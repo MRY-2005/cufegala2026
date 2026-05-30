@@ -201,6 +201,7 @@ async function handleRegister() {
   bgAfter.style.opacity = '1';
   resultOverlay.innerHTML = '<div class="loading-dot"></div>';
   tipText.textContent = '正在生成预约编号...';
+  tipText.style.top = '74%';  // 第二页文字下移
 
   try {
     const r = await fetch('/api/register', { method: 'POST' });
@@ -236,6 +237,7 @@ function showNumber(num) {
 
   resultOverlay.innerHTML = '<div class="result-number">' + fmt(num) + '</div>';
   tipText.textContent = '截图分享到朋友圈，看看谁排在你前面 😉';
+  tipText.style.top = '74%';  // 第二页文字下移
 }
 
 // ========== 彩带 ==========
