@@ -80,8 +80,8 @@
   .result-overlay {
     position: absolute;
     /* 调整这里：top越大越往下，left越大越往右 */
-    top: 50.5%;
-    left: 30%;
+    top: 50.2%;
+    left: 31%;
     width: 55%;
     text-align: center;
     z-index: 10;
@@ -145,12 +145,12 @@
 
 <div class="phone" id="phone">
 
-  <!-- 背景：首页设计（含按钮的初始状态） -->
+  <!-- 背景：首页设计（初始隐藏，JS决定显示哪个） -->
   <img class="bg-image" id="bgBefore" src="home.webp" alt="首页"
-       style="opacity:1;">
+       style="opacity:0;">
 
   <!-- 背景：结果页设计（数字显示状态） -->
-  <img class="bg-image hidden" id="bgAfter" src="result.webp" alt="结果"
+  <img class="bg-image" id="bgAfter" src="result.webp" alt="结果"
        style="opacity:0;">
 
   <!-- 按钮热区 -->
@@ -250,8 +250,12 @@ function launchConfetti() {
 (function () {
   const stored = localStorage.getItem('cufe_gala_number');
   if (stored) {
-    // 已经报过名，直接显示结果
+    // 已经报过名 → 直接显示结果页，首页和按钮永不出现
     showNumber(parseInt(stored));
+  } else {
+    // 未报名 → 显示首页 + 按钮
+    document.getElementById('bgBefore').style.opacity = '1';
+    document.getElementById('btnZone').classList.remove('hidden');
   }
 })();
 </script>
