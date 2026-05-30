@@ -4,7 +4,14 @@ const fs = require('fs');
 
 const app = express();
 app.use(express.json());
-app.use(express.static(path.join(__dirname, 'public')));
+// 静态文件 + 缓存（图片缓存24小时，重复访问秒开）
+app.use(express.static(path.join(__dirname, 'public'), {
+  setHeaders: (res, filePath) => {
+    if (filePath.match(/\.(webp|png|jpg|jpeg|svg)$/)) {
+      res.setHeader('Cache-Control', 'public, max-age=86400, immutable');
+    }
+  }
+}));
 
 // ============================================================
 //  根路由 —— 返回报名页面

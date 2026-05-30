@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="format-detection" content="telephone=no">
 <link rel="preload" as="image" href="home.webp" fetchpriority="high">
+<link rel="preload" as="image" href="result.webp">
+<link rel="preload" as="image" href="btn-register.webp">
 <title>中财大2026届毕业生晚会 · 预约报名</title>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -151,13 +153,13 @@
 
 <div class="phone" id="phone">
 
-  <!-- 背景：首页设计（初始隐藏，JS决定显示哪个） -->
+  <!-- 背景：首页 -->
   <img class="bg-image" id="bgBefore" src="home.webp" alt="首页"
-       style="opacity:0;">
+       style="opacity:0;" decoding="async" loading="eager">
 
-  <!-- 背景：结果页设计（数字显示状态） -->
+  <!-- 背景：结果页 -->
   <img class="bg-image" id="bgAfter" src="result.webp" alt="结果"
-       style="opacity:0;">
+       style="opacity:0;" decoding="async" loading="eager">
 
   <!-- 按钮（图片+跳动动画） -->
   <div class="btn-zone" id="btnZone" onclick="handleRegister()">
