@@ -57,25 +57,19 @@
     left: 50%;
     transform: translateX(-50%);
     width: 65%;
-    padding: 14px 0;
     cursor: pointer;
     -webkit-tap-highlight-color: transparent;
     z-index: 10;
     border: none;
-    border-radius: 50px;
-    background: linear-gradient(135deg, #e8a830 0%, #d4941a 40%, #c08218 100%);
-    color: #fff;
-    font-size: clamp(16px, 4.5vw, 20px);
-    font-weight: 700;
-    letter-spacing: 4px;
-    text-align: center;
-    box-shadow: 0 6px 24px rgba(200,150,30,0.35), 0 0 60px rgba(220,170,40,0.15);
-    transition: all 0.3s;
-    text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+    background: none;
+    padding: 0;
+  }
+  .btn-zone img {
+    width: 100%;
+    display: block;
   }
   .btn-zone:active {
     transform: translateX(-50%) scale(0.94);
-    box-shadow: 0 3px 12px rgba(200,150,30,0.2);
   }
   .btn-zone.hidden {
     display: none;
@@ -159,9 +153,9 @@
        style="opacity:0;">
 
   <!-- 按钮 -->
-  <button class="btn-zone" id="btnZone" onclick="handleRegister()">
-    ✨ 立即预约 ✨
-  </button>
+  <div class="btn-zone" id="btnZone" onclick="handleRegister()">
+    <img src="btn-register.webp" alt="立即预约">
+  </div>
 
   <!-- 数字显示区 -->
   <div class="result-overlay" id="resultOverlay"></div>
