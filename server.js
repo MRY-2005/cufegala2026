@@ -4,6 +4,7 @@ const fs = require('fs');
 
 const app = express();
 app.use(express.json());
+app.use(express.static(path.join(__dirname, 'public')));
 
 // ============================================================
 //  根路由 —— 返回报名页面
