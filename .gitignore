@@ -1,0 +1,8 @@
+node_modules/
+counter.json
+*.db
+*.db-journal
+*.db-wal
+site-url.json
+qrcode.png
+.env
