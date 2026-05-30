@@ -17,14 +17,20 @@ app.get('/', (req, res) => {
 //  数据库初始化（自动选择 JSON 文件 或 PostgreSQL）
 // ============================================================
 let db;
-const isPostgres = !!process.env.DATABASE_URL;
-console.log('DATABASE_URL 是否存在:', isPostgres);
+
+// 调试：列出所有数据库相关环境变量
+const pgUrl = process.env.DATABASE_URL || process.env.DATABASE_PUBLIC_URL || process.env.POSTGRES_URL || '';
+const isPostgres = !!pgUrl;
+console.log('DATABASE_URL:', process.env.DATABASE_URL ? '有' : '无');
+console.log('DATABASE_PUBLIC_URL:', process.env.DATABASE_PUBLIC_URL ? '有' : '无');
+console.log('POSTGRES_URL:', process.env.POSTGRES_URL ? '有' : '无');
+console.log('最终使用 PostgreSQL:', isPostgres);
 
 if (isPostgres) {
   // ---- Railway / PostgreSQL ----
   const { Pool } = require('pg');
   const pool = new Pool({
-    connectionString: process.env.DATABASE_URL,
+    connectionString: pgUrl,
     ssl: { rejectUnauthorized: false },
   });
 
