@@ -33,9 +33,10 @@ if (isPostgres) {
       await pool.query(`
         CREATE TABLE IF NOT EXISTS counter (
           id    INTEGER PRIMARY KEY DEFAULT 1,
-          value INTEGER NOT NULL DEFAULT 0
+          value INTEGER NOT NULL DEFAULT 0,
+          generation INTEGER NOT NULL DEFAULT 1
         );
-        INSERT INTO counter (id, value) VALUES (1, 0)
+        INSERT INTO counter (id, value, generation) VALUES (1, 0, 1)
         ON CONFLICT (id) DO NOTHING;
       `);
       console.log('数据库初始化完成: PostgreSQL');
@@ -50,24 +51,37 @@ if (isPostgres) {
       const res = await pool.query(`SELECT value FROM counter WHERE id = 1`);
       return res.rows[0]?.value ?? 0;
     },
+    async getInfo() {
+      const res = await pool.query(`SELECT value, generation FROM counter WHERE id = 1`);
+      return { total: res.rows[0]?.value ?? 0, generation: res.rows[0]?.generation ?? 1 };
+    },
     async reset(val) {
-      await pool.query('UPDATE counter SET value = $1 WHERE id = 1', [val]);
+      // 重置计数 + 递增版本号（让所有人手机上的旧数据失效）
+      await pool.query('UPDATE counter SET value = $1, generation = generation + 1 WHERE id = 1', [val]);
     },
   };
 } else {
   // ---- 本地 / JSON 文件 ----
   const COUNTER_FILE = path.join(__dirname, 'counter.json');
 
-  function readCounter() {
+  function readAll() {
     try {
-      return JSON.parse(fs.readFileSync(COUNTER_FILE, 'utf-8')).value;
+      return JSON.parse(fs.readFileSync(COUNTER_FILE, 'utf-8'));
     } catch {
-      return 0;
+      return { value: 0, generation: 1 };
     }
   }
 
+  function readCounter() { return readAll().value; }
+
   function writeCounter(value) {
-    fs.writeFileSync(COUNTER_FILE, JSON.stringify({ value }));
+    const data = readAll();
+    data.value = value;
+    fs.writeFileSync(COUNTER_FILE, JSON.stringify(data));
+  }
+
+  function writeAll(data) {
+    fs.writeFileSync(COUNTER_FILE, JSON.stringify(data));
   }
 
   // 确保文件存在
@@ -85,8 +99,15 @@ if (isPostgres) {
     async getCount() {
       return readCounter();
     },
+    async getInfo() {
+      const data = readAll();
+      return { total: data.value, generation: data.generation || 1 };
+    },
     async reset(val) {
-      writeCounter(val);
+      const data = readAll();
+      data.value = val;
+      data.generation = (data.generation || 1) + 1;
+      writeAll(data);
     },
   };
 }
@@ -99,7 +120,16 @@ app.get('/api/count', async (req, res) => {
     const total = await db.getCount();
     res.json({ total });
   } catch (e) {
-    console.error('GET /api/count 失败:', e.message);
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// 获取计数 + 版本号（客户端用来判断是否被重置过）
+app.get('/api/info', async (req, res) => {
+  try {
+    const info = await db.getInfo();
+    res.json(info);
+  } catch (e) {
     res.status(500).json({ error: e.message });
   }
 });
@@ -107,9 +137,9 @@ app.get('/api/count', async (req, res) => {
 app.post('/api/register', async (req, res) => {
   try {
     const number = await db.increment();
-    res.json({ number });
+    const info = await db.getInfo();
+    res.json({ number, generation: info.generation });
   } catch (e) {
-    console.error('POST /api/register 失败:', e.message);
     res.status(500).json({ error: e.message });
   }
 });

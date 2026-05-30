@@ -209,6 +209,7 @@ async function handleRegister() {
     if (!r.ok) throw new Error(d.error || '请求失败');
 
     localStorage.setItem('cufe_gala_number', d.number);
+    localStorage.setItem('cufe_gala_generation', d.generation);
     showNumber(d.number);
     launchConfetti();
     tipText.textContent = '截图分享到朋友圈，看看谁排在你前面 😉';
@@ -254,16 +255,33 @@ function launchConfetti() {
 }
 
 // ========== 页面加载 ==========
-(function () {
-  const stored = localStorage.getItem('cufe_gala_number');
-  if (stored) {
-    // 已经报过名 → 直接显示结果页，首页和按钮永不出现
-    showNumber(parseInt(stored));
-  } else {
-    // 未报名 → 显示首页 + 按钮
-    document.getElementById('bgBefore').style.opacity = '1';
-    document.getElementById('btnZone').classList.remove('hidden');
+(async function () {
+  const storedNumber = localStorage.getItem('cufe_gala_number');
+  const storedGen = localStorage.getItem('cufe_gala_generation');
+
+  if (storedNumber && storedGen) {
+    // 检查版本号：如果服务器已重置，清除本地数据
+    try {
+      const r = await fetch('/api/info');
+      const info = await r.json();
+      if (parseInt(storedGen) !== info.generation) {
+        // 版本不匹配 → 管理员重置过 → 清空
+        localStorage.removeItem('cufe_gala_number');
+        localStorage.removeItem('cufe_gala_generation');
+      } else {
+        showNumber(parseInt(storedNumber));
+        return;
+      }
+    } catch (e) {
+      // 网络异常，仍然显示缓存的数字
+      showNumber(parseInt(storedNumber));
+      return;
+    }
   }
+
+  // 未报名或已重置 → 显示首页
+  document.getElementById('bgBefore').style.opacity = '1';
+  document.getElementById('btnZone').classList.remove('hidden');
 })();
 </script>
 
