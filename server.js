@@ -36,12 +36,21 @@ if (isPostgres) {
 
   db = {
     async init() {
+      // 创建表
       await pool.query(`
         CREATE TABLE IF NOT EXISTS counter (
           id    INTEGER PRIMARY KEY DEFAULT 1,
-          value INTEGER NOT NULL DEFAULT 0,
-          generation INTEGER NOT NULL DEFAULT 1
+          value INTEGER NOT NULL DEFAULT 0
         );
+      `);
+      // 兼容旧表：添加 generation 列
+      try {
+        await pool.query(`ALTER TABLE counter ADD COLUMN generation INTEGER NOT NULL DEFAULT 1`);
+      } catch (e) {
+        // 列已存在则忽略
+      }
+      // 确保初始行存在
+      await pool.query(`
         INSERT INTO counter (id, value, generation) VALUES (1, 0, 1)
         ON CONFLICT (id) DO NOTHING;
       `);
@@ -159,7 +168,13 @@ app.get('/api/reset', async (req, res) => {
 });
 
 app.get('/health', (req, res) => {
-  res.json({ ok: true, db: isPostgres ? 'PostgreSQL' : 'JSON' });
+  // 列出所有环境变量名（只显示以 DATABASE 或 POSTGRES 开头的）
+  const keys = Object.keys(process.env).filter(k =>
+    k.includes('DATABASE') || k.includes('POSTGRES') || k.includes('PG')
+  );
+  const vars = {};
+  keys.forEach(k => { vars[k] = process.env[k] ? process.env[k].substring(0, 20) + '...' : '空'; });
+  res.json({ ok: true, db: isPostgres ? 'PostgreSQL' : 'JSON', envKeys: keys, vars });
 });
 
 // ============================================================

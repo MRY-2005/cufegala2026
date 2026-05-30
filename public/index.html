@@ -259,16 +259,18 @@ function launchConfetti() {
   const storedNumber = localStorage.getItem('cufe_gala_number');
   const storedGen = localStorage.getItem('cufe_gala_generation');
 
-  if (storedNumber && storedGen) {
-    // 检查版本号：如果服务器已重置，清除本地数据
+  if (storedNumber) {
+    // 检查版本号（旧数据没有 generation 也兼容）
     try {
       const r = await fetch('/api/info');
       const info = await r.json();
-      if (parseInt(storedGen) !== info.generation) {
+      if (storedGen && parseInt(storedGen) !== info.generation) {
         // 版本不匹配 → 管理员重置过 → 清空
         localStorage.removeItem('cufe_gala_number');
         localStorage.removeItem('cufe_gala_generation');
       } else {
+        // 补存 generation（兼容旧数据）
+        if (!storedGen) localStorage.setItem('cufe_gala_generation', info.generation);
         showNumber(parseInt(storedNumber));
         return;
       }
