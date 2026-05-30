@@ -54,18 +54,24 @@
   /* 按钮热区（透明，覆盖在原图按钮上方） */
   .btn-zone {
     position: absolute;
-    top: 40%;
+    top: 43%;
     left: 50%;
     transform: translateX(-50%);
-    width: 50%;
+    width: 42%;
     height: 10%;
     cursor: pointer;
     -webkit-tap-highlight-color: transparent;
     z-index: 10;
     background: transparent;
+    animation: bounce 2s ease-in-out infinite;
+  }
+  @keyframes bounce {
+    0%, 100% { transform: translateX(-50%) scale(1); }
+    50% { transform: translateX(-50%) scale(1.06); }
   }
   .btn-zone:active {
-    transform: translateX(-50%) scale(0.94);
+    transform: translateX(-50%) scale(0.92);
+    animation: none;
   }
   .btn-zone.hidden {
     display: none;
