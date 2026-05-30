@@ -161,8 +161,8 @@
   <img class="bg-image" id="bgAfter" src="result.webp" alt="结果"
        style="opacity:0;" decoding="async" loading="eager">
 
-  <!-- 按钮（图片+跳动动画） -->
-  <div class="btn-zone" id="btnZone" onclick="handleRegister()">
+  <!-- 按钮（默认隐藏，只有未报名才显示） -->
+  <div class="btn-zone hidden" id="btnZone" onclick="handleRegister()">
     <img src="btn-register.webp" alt="立即预约" id="btnImg">
   </div>
 
@@ -257,35 +257,28 @@ function launchConfetti() {
 }
 
 // ========== 页面加载 ==========
-(async function () {
+(function () {
   const storedNumber = localStorage.getItem('cufe_gala_number');
   const storedGen = localStorage.getItem('cufe_gala_generation');
 
   if (storedNumber) {
-    // 检查版本号（旧数据没有 generation 也兼容）
-    try {
-      const r = await fetch('/api/info');
-      const info = await r.json();
+    // 有缓存 → 立即显示结果页，不闪现首页
+    showNumber(parseInt(storedNumber));
+
+    // 后台异步检查版本号（管理员重置后自动清缓存）
+    fetch('/api/info').then(r => r.json()).then(info => {
       if (storedGen && parseInt(storedGen) !== info.generation) {
-        // 版本不匹配 → 管理员重置过 → 清空
         localStorage.removeItem('cufe_gala_number');
         localStorage.removeItem('cufe_gala_generation');
-      } else {
-        // 补存 generation（兼容旧数据）
-        if (!storedGen) localStorage.setItem('cufe_gala_generation', info.generation);
-        showNumber(parseInt(storedNumber));
-        return;
+        location.reload();
       }
-    } catch (e) {
-      // 网络异常，仍然显示缓存的数字
-      showNumber(parseInt(storedNumber));
-      return;
-    }
+      if (!storedGen) localStorage.setItem('cufe_gala_generation', info.generation);
+    }).catch(() => {});
+  } else {
+    // 未报名 → 显示首页
+    document.getElementById('bgBefore').style.opacity = '1';
+    document.getElementById('btnZone').classList.remove('hidden');
   }
-
-  // 未报名或已重置 → 显示首页
-  document.getElementById('bgBefore').style.opacity = '1';
-  document.getElementById('btnZone').classList.remove('hidden');
 })();
 </script>
 
